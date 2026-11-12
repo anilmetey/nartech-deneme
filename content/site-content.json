@@ -2,7 +2,7 @@
   "home": {
     "titleTr": "Doğru Mühendislik & Doğru Ürün.",
     "bodyTr": "Petrol & Gaz, Petrokimya, Kimya, Su, Upstream, Downstream ve Offshore sektörlerinde; uluslararası güvenlik, kalite ve performans standartlarına tam uyumlu, dünya standartlarında mühendislik çözümleri sunuyoruz.",
-    "titleEn": "The Right Engineering & The Right Product. ",
+    "titleEn": "The Right Engineering & The Right Products",
     "bodyEn": "We provide world-class engineering solutions across the Oil & Gas, Petrochemical, Chemical, Water, Upstream, Downstream, and Offshore industries, fully compliant with international safety, quality, and performance standards."
   },
   "about": {
@@ -56,10 +56,6 @@
   "homeWhatWeDo": {
     "paragraphsTr": [
       {
-        "text": "Petrol & Gaz, Petrokimya, Kimya, Su, Upstream, Downstream ve Offshore sektörlerinde; uluslararası güvenlik, kalite ve performans standartlarına tam uyumlu, dünya standartlarında mühendislik çözümleri sunuyoruz.",
-        "source": "Mahmut Tunaz: 2026-11-08"
-      },
-      {
         "text": "Ayrıca tank terminalleri, rafineriler ve önde gelen EPC yüklenicileri için uzmanlaşmış ürün tedariki ve mühendislik çözümleri sunuyoruz.",
         "source": "Mahmut Tunaz: 2026-11-08"
       },
@@ -78,10 +74,6 @@
     ],
     "paragraphsEn": [
       {
-        "text": "We provide world-class engineering solutions across the Oil & Gas, Petrochemical, Chemical, Water, Upstream, Downstream, and Offshore industries, fully compliant with international safety, quality, and performance standards.",
-        "source": "Mahmut Tunaz: 2026-11-08"
-      },
-      {
         "text": "In addition, we provide specialized product procurement and engineering solutions for tank terminals, refineries, and leading EPC contractors.",
         "source": "Mahmut Tunaz: 2026-11-08"
       },
@@ -97,7 +89,9 @@
         "text": "To us, the right product does more than meet technical specifications. It brings together safety, performance, operational efficiency, and long-term value.",
         "source": "Mahmut Tunaz: 2026-11-08"
       }
-    ]
+    ],
+    "titleTr": "Stratejik Proje Ortağınız",
+    "titleEn": "Your Strategic Project Partner"
   },
   "whatWeDo": {
     "titleTr": "Doğru Mühendislik & Doğru Ürün.",
@@ -127,7 +121,7 @@
         "source": "Mahmut Tunaz: 2026-11-08"
       }
     ],
-    "titleEn": "The Right Engineering & The Right Product. ",
+    "titleEn": "The Right Engineering & The Right Products",
     "paragraphsEn": [
       {
         "text": "We provide world-class engineering solutions across the Oil & Gas, Petrochemical, Chemical, Water, Upstream, Downstream, and Offshore industries, fully compliant with international safety, quality, and performance standards.",
@@ -728,8 +722,8 @@
           "source": 56
         }
       ],
-      "titleTr": "1-Depolama Tankı Ekipmanları",
-      "titleEn": "1-Storage Tank Equipments"
+      "titleTr": "1-Depolama Tankı Ekipmanları (ATEX Sertifikalı)",
+      "titleEn": "1-Storage Tank Equipments (ATEX Certified)"
     },
     {
       "id": "fire-fighting-equipments",

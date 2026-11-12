@@ -14,8 +14,8 @@
   };
 
   const selectedLanguage = () => {
-    try { return localStorage.getItem('nartech-language') || 'tr'; }
-    catch { return 'tr'; }
+    try { return localStorage.getItem('nartech-language') || 'en'; }
+    catch { return 'en'; }
   };
   const setLanguage = language => {
     language = language === 'en' ? 'en' : 'tr';
@@ -23,6 +23,9 @@
     root.setAttribute('data-language', language);
     root.lang = language;
     const english = language === 'en';
+    document.querySelectorAll('.footer-tagline .lang-en').forEach(element => {
+      element.textContent = 'The Right Engineering & The Right Products';
+    });
     if (root.dataset.titleEn && root.dataset.titleTr) {
       document.title = english ? root.dataset.titleEn : root.dataset.titleTr;
     }
@@ -400,7 +403,7 @@
 
     const defaultBannerHTML = {
       tr: '<strong>Doğru Mühendislik &amp; Doğru Ürün:</strong> Müşteri gereksinimlerinden nihai çözüme kesintisiz, güvenilir ve sertifikalı süreç.',
-      en: '<strong>The Right Engineering &amp; The Right Product:</strong> Seamless, certified, and reliable flow from technical requirements to final solutions.'
+      en: '<strong>The Right Engineering &amp; The Right Products:</strong> Seamless, certified, and reliable flow from technical requirements to final solutions.'
     };
 
     let activeNode = null;
@@ -474,4 +477,209 @@
 
   const homeFlow = document.querySelector('[data-home-flow]');
   if (homeFlow) homeFlow.classList.add('is-visible');
+
+  // Ürünler: kategori gezgini (masaüstü: iki sütun, mobil: kaydırılabilir sekmeler)
+  const setupCatalogExplorer = () => {
+    const page = document.querySelector('.catalog-page');
+    const content = page && page.querySelector('.catalog-content');
+    if (!content) return;
+    const sources = [...content.children].filter(el => el.matches('details.tree-group, .tree-root-label'));
+    if (!sources.length) return;
+
+    const el = (tag, cls, html) => {
+      const node = document.createElement(tag);
+      if (cls) node.className = cls;
+      if (html != null) node.innerHTML = html;
+      return node;
+    };
+    const bi = (tr, en) => `<span class="lang-tr">${tr}</span><span class="lang-en">${en}</span>`;
+    const arrow = '<svg class="cx-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5 10 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    const explorer = el('div', 'cx');
+    const rail = el('div', 'cx-rail');
+    rail.setAttribute('role', 'tablist');
+    rail.setAttribute('aria-orientation', 'vertical');
+    const stage = el('div', 'cx-stage');
+    const stageCard = el('div', 'cx-stage-card');
+    stage.append(stageCard);
+    explorer.append(rail, stage);
+
+    const splitTitle = node => {
+      const clone = node.cloneNode(true);
+      const parts = {};
+      clone.querySelectorAll('.lang-tr, .lang-en').forEach(span => {
+        const lang = span.classList.contains('lang-en') ? 'en' : 'tr';
+        const m = span.textContent.trim().match(/^(\d+)\s*-\s*(.*)$/);
+        parts[lang] = m ? m[2] : span.textContent.trim();
+        parts.num = m ? m[1].padStart(2, '0') : parts.num;
+      });
+      return parts;
+    };
+
+    const linkCard = (a, n) => {
+      const card = el('a', 'cx-link',
+        `<span class="cx-idx">${String(n).padStart(2, '0')}</span>` +
+        `<span class="cx-body"><span class="cx-title">${a.innerHTML}</span><span class="cx-more">${bi('Ürünü incele', 'View product')}</span></span>` +
+        `<span class="cx-go">${arrow}</span>`);
+      card.href = a.getAttribute('href');
+      return card;
+    };
+
+    const items = sources.map((src, index) => {
+      const id = src.id || `cat-${index}`;
+      const titleNode = src.matches('details') ? src.querySelector(':scope > summary') : src;
+      const t = splitTitle(titleNode);
+      const children = src.querySelector(':scope > .tree-children');
+      const directLinks = children ? [...children.querySelectorAll(':scope > a.tree-link')] : [];
+      const branches = children ? [...children.querySelectorAll(':scope > details.tree-branch')] : [];
+      const total = children ? children.querySelectorAll('a.tree-link').length : 0;
+
+      const tab = el('button', 'cx-tab', `<span class="cx-num">${t.num || ''}</span><span class="cx-name">${bi(t.tr || '', t.en || t.tr || '')}</span><span class="cx-tab-count">${total || '–'}</span>`);
+      tab.type = 'button';
+      tab.id = `cx-tab-${id}`;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', `cx-panel-${id}`);
+      tab.dataset.target = id;
+      rail.append(tab);
+
+      const panel = el('section', 'cx-panel');
+      panel.id = `cx-panel-${id}`;
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', tab.id);
+      const head = el('header', 'cx-head',
+        `<span class="cx-kicker">${bi('Kategori', 'Category')} ${t.num || ''}</span>` +
+        `<h2>${bi(t.tr || '', t.en || t.tr || '')}</h2>` +
+        (total ? `<span class="cx-count">${bi(`${total} ürün`, `${total} ${total === 1 ? 'product' : 'products'}`)}</span>` : ''));
+      panel.append(head);
+
+      const copy = children && children.querySelector(':scope > .tree-copy');
+      if (copy && copy.textContent.trim()) panel.append(el('div', 'cx-copy', copy.innerHTML));
+
+      let n = 0;
+      if (directLinks.length) {
+        const grid = el('div', 'cx-grid');
+        directLinks.forEach(a => grid.append(linkCard(a, ++n)));
+        panel.append(grid);
+      }
+      branches.forEach(branch => {
+        const group = el('div', 'cx-sub');
+        group.append(el('h3', 'cx-subtitle', branch.querySelector(':scope > summary').innerHTML));
+        const grid = el('div', 'cx-grid');
+        branch.querySelectorAll('a.tree-link').forEach(a => grid.append(linkCard(a, ++n)));
+        group.append(grid);
+        panel.append(group);
+      });
+      if (!total) {
+        panel.append(el('div', 'cx-empty',
+          `<p>${bi('Bu kategorideki çözümler projeye özel tasarlanır. İhtiyacınızı iletin, size uygun ürünü birlikte belirleyelim.', 'Solutions in this category are engineered per project. Share your requirements and we will specify the right product together.')}</p>` +
+          `<a class="cx-cta" href="contact.html#contact-form">${bi('Teklif İste', 'Request a Quote')}${arrow}</a>`));
+      }
+      stageCard.append(panel);
+      return { id, tab, panel, total };
+    });
+
+    const bottomRow = el('div', 'cx-bottom-row');
+    const help = el('div', 'cx-help',
+      `<div><strong>${bi('Aradığınız modeli göremediniz mi?', 'Can’t find the exact model?')}</strong>` +
+      `<span>${bi('Proses koşullarınızı iletin, mühendislerimiz doğru ürünü belirlesin.', 'Share your process conditions and our engineers will specify the right product.')}</span></div>` +
+      `<a class="cx-cta" href="contact.html#contact-form">${bi('Teklif İste', 'Request a Quote')}${arrow}</a>`);
+    bottomRow.append(help);
+    const stdNote = page.querySelector('.product-standards-note');
+    if (stdNote) {
+      stdNote.classList.add('cx-standards');
+      bottomRow.append(stdNote);
+    }
+    stage.append(bottomRow);
+
+    let active = null;
+    const activate = (id, { focus = false } = {}) => {
+      const item = items.find(i => i.id === id) || items[0];
+      if (active === item) return;
+      items.forEach(i => {
+        const on = i === item;
+        i.tab.classList.toggle('is-active', on);
+        i.tab.setAttribute('aria-selected', String(on));
+        i.tab.tabIndex = on ? 0 : -1;
+        i.panel.classList.toggle('is-active', on);
+        i.panel.hidden = !on;
+      });
+      stage.classList.toggle('is-empty-cat', item.total === 0);
+      if (focus) item.tab.focus();
+      if (rail.scrollWidth > rail.clientWidth) {
+        rail.scrollTo({ left: item.tab.offsetLeft - (rail.clientWidth - item.tab.offsetWidth) / 2, behavior: active ? 'smooth' : 'auto' });
+      }
+      active = item;
+    };
+
+    // Hover niyeti: yalnızca fare sağdaki panele çapraz giderken kısa gecikme uygula; dikey gezintide anında aç.
+    let hoverTimer = null;
+    let lastX = 0;
+    let lastY = 0;
+    let dx = 0;
+    let dy = 0;
+    rail.addEventListener('mousemove', e => {
+      dx = e.clientX - lastX;
+      dy = e.clientY - lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+    }, { passive: true });
+    items.forEach(item => {
+      item.tab.addEventListener('mouseenter', () => {
+        clearTimeout(hoverTimer);
+        if (dx > 5 && dx > Math.abs(dy) * 1.4) {
+          hoverTimer = setTimeout(() => {
+            if (item.tab.matches(':hover')) activate(item.id);
+          }, 90);
+        } else {
+          activate(item.id);
+        }
+      });
+      item.tab.addEventListener('click', () => {
+        clearTimeout(hoverTimer);
+        activate(item.id);
+        if (window.matchMedia('(max-width: 899px)').matches) {
+          const top = stage.getBoundingClientRect().top - rail.getBoundingClientRect().bottom - 12;
+          if (top < 0) window.scrollBy({ top, behavior: 'smooth' });
+        }
+      });
+      item.tab.addEventListener('focus', () => activate(item.id));
+    });
+    rail.addEventListener('mouseleave', () => clearTimeout(hoverTimer));
+    rail.addEventListener('keydown', e => {
+      const index = items.indexOf(active);
+      const map = { ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: items.length - 1 };
+      if (!(e.key in map)) return;
+      e.preventDefault();
+      const next = items[(map[e.key] + items.length) % items.length];
+      activate(next.id, { focus: true });
+    });
+
+    const fromHash = () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      if (id && items.some(i => i.id === id)) {
+        activate(id);
+        explorer.scrollIntoView({ block: 'start' });
+        return true;
+      }
+      return false;
+    };
+    if (!fromHash()) activate(items[0].id);
+    window.addEventListener('hashchange', fromHash);
+
+    content.before(explorer);
+    document.body.classList.add('is-catalog-page');
+    page.classList.add('has-cx');
+
+    const header = document.querySelector('.site-header');
+    const syncTop = () => {
+      if (header && getComputedStyle(header).position === 'sticky') {
+        explorer.style.setProperty('--cx-sticky-top', `${header.offsetHeight}px`);
+      } else {
+        explorer.style.setProperty('--cx-sticky-top', '0px');
+      }
+    };
+    syncTop();
+    window.addEventListener('resize', syncTop, { passive: true });
+  };
+  setupCatalogExplorer();
 })();

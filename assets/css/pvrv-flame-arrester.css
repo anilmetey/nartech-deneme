@@ -1,0 +1,46 @@
+.pvrv-flame-page .pvrv-product-hero {
+  display: block;
+}
+
+.pvrv-flame-page .pvrv-product-title {
+  max-width: 900px;
+  margin: 0 auto 24px;
+  text-align: center;
+}
+
+.pvrv-flame-page .pvrv-product-gallery {
+  display: block;
+  width: min(100%, 500px);
+  margin: 0 auto;
+}
+
+.pvrv-flame-page .pvrv-product-media {
+  aspect-ratio: 3 / 4;
+  padding: clamp(12px, 2vw, 22px);
+}
+
+.pvrv-flame-page .pvrv-product-media img {
+  object-fit: contain;
+}
+
+.pvrv-flame-page .product-detail-specs .product-specs-wrap {
+  margin-top: 28px;
+}
+
+@media (max-width: 640px) {
+  .pvrv-flame-page .pvrv-product-title {
+    margin-bottom: 18px;
+  }
+
+  .pvrv-flame-page .pvrv-product-gallery {
+    width: min(100%, 350px);
+  }
+}
+
+/* Keep the full portrait product render visible on every screen. */
+.pvrv-flame-page .pvrv-product-gallery > .pvrv-product-media:first-child > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}

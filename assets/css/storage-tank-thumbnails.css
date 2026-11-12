@@ -1,0 +1,13 @@
+.storage-tank-equipments-page .product-card-media {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #f7f9f7;
+}
+
+.storage-tank-equipments-page .product-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}

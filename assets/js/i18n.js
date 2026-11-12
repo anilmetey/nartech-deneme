@@ -134,7 +134,7 @@ const translations = {
     // Taglines & Hero
     company_title: "Nartech Engineering",
     company_subtitle: "Industrial Flow & Storage Safety Systems",
-    hero_tagline: "The Right Engineering & The Right Product.",
+    hero_tagline: "The Right Engineering & The Right Products",
     hero_title: "High-Specification Engineering Solutions for Oil, Gas & Industrial Facilities",
     hero_desc: "In the Oil & Gas, Petrochemical, Chemical, Water, Upstream, Downstream, and Offshore sectors, we deliver international-standard engineering solutions in full compliance with global safety, quality, and performance codes, and develop products tailor-made to our client's specifications.",
     hero_cta_primary: "Request Engineering Quote (RFQ)",
@@ -232,7 +232,7 @@ const translations = {
     footer_quick_links: "Quick Links",
     footer_products_col: "Product Lines",
     footer_contact_col: "Contact & Location",
-    footer_tagline: "The Right Engineering & The Right Product.",
+    footer_tagline: "The Right Engineering & The Right Products",
     footer_rights: "All rights reserved. Certified to international engineering standards.",
     footer_direct_rfq: "Submit Direct RFQ →",
     footer_privacy: "Privacy Policy"
