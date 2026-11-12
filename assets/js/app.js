@@ -478,7 +478,7 @@
   const homeFlow = document.querySelector('[data-home-flow]');
   if (homeFlow) homeFlow.classList.add('is-visible');
 
-  // Ürünler: kategori gezgini (masaüstü: iki sütun, mobil: kaydırılabilir sekmeler)
+  // Ürünler: kategori gezgini (masaüstü: iki sütun, mobil: hızlı seçici, modal ve kompakt ızgara)
   const setupCatalogExplorer = () => {
     const page = document.querySelector('.catalog-page');
     const content = page && page.querySelector('.catalog-content');
@@ -496,6 +496,33 @@
     const arrow = '<svg class="cx-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5 10 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
     const explorer = el('div', 'cx');
+    
+    // Mobil hızlı kategori çubuğu (prev / seçici / next)
+    const mobBar = el('div', 'cx-mob-bar');
+    const prevBtn = el('button', 'cx-mob-nav cx-mob-prev', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>');
+    prevBtn.type = 'button';
+    prevBtn.setAttribute('aria-label', 'Önceki Kategori');
+
+    const triggerBtn = el('button', 'cx-mob-trigger');
+    triggerBtn.type = 'button';
+    triggerBtn.setAttribute('aria-haspopup', 'dialog');
+    triggerBtn.innerHTML = `
+      <div class="cx-mob-trigger-text">
+        <span class="cx-mob-kicker">${bi('Kategori', 'Category')} <span class="cx-mob-idx">01 / 11</span></span>
+        <span class="cx-mob-title"></span>
+      </div>
+      <span class="cx-mob-badge"></span>
+      <svg class="cx-mob-caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    `;
+
+    const nextBtn = el('button', 'cx-mob-nav cx-mob-next', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>');
+    nextBtn.type = 'button';
+    nextBtn.setAttribute('aria-label', 'Sonraki Kategori');
+
+    mobBar.append(prevBtn, triggerBtn, nextBtn);
+    explorer.append(mobBar);
+
+    // Kategori listesi (Masaüstü: sol ray, Mobil: yatay haplar)
     const rail = el('div', 'cx-rail');
     rail.setAttribute('role', 'tablist');
     rail.setAttribute('aria-orientation', 'vertical');
@@ -575,7 +602,82 @@
           `<a class="cx-cta" href="contact.html#contact-form">${bi('Teklif İste', 'Request a Quote')}${arrow}</a>`));
       }
       stageCard.append(panel);
-      return { id, tab, panel, total };
+      return { id, tab, panel, total, t };
+    });
+
+    // Mobil alt kategori geçiş çubuğu (Panel sonuna hızlı sonraki/önceki butonları)
+    items.forEach((item, idx) => {
+      const mobFooter = el('div', 'cx-mob-panel-footer');
+      if (idx > 0) {
+        const pBtn = el('button', 'cx-mob-step cx-mob-step-prev', `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg> <span>${bi('Önceki', 'Previous')}: ${items[idx - 1].t.num}</span>`);
+        pBtn.type = 'button';
+        pBtn.addEventListener('click', () => {
+          activate(items[idx - 1].id);
+          const top = explorer.getBoundingClientRect().top + window.scrollY - 8;
+          window.scrollTo({ top, behavior: 'smooth' });
+        });
+        mobFooter.append(pBtn);
+      }
+      if (idx < items.length - 1) {
+        const nBtn = el('button', 'cx-mob-step cx-mob-step-next', `<span>${bi('Sonraki', 'Next')}: ${items[idx + 1].t.num}</span> <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>`);
+        nBtn.type = 'button';
+        nBtn.addEventListener('click', () => {
+          activate(items[idx + 1].id);
+          const top = explorer.getBoundingClientRect().top + window.scrollY - 8;
+          window.scrollTo({ top, behavior: 'smooth' });
+        });
+        mobFooter.append(nBtn);
+      }
+      item.panel.append(mobFooter);
+    });
+
+    // Mobil Alt Çekmece (Bottom Sheet) - Tüm 11 kategoriyi tek ekranda açar
+    const sheetBackdrop = el('div', 'cx-sheet-backdrop');
+    const sheet = el('div', 'cx-sheet');
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'true');
+    const sheetHead = el('div', 'cx-sheet-head', `
+      <div class="cx-sheet-head-title">
+        <h3>${bi('Tüm Kategoriler', 'All Categories')}</h3>
+        <span class="cx-sheet-pill">${items.length} ${bi('Kategori', 'Categories')}</span>
+      </div>
+      <button type="button" class="cx-sheet-close" aria-label="Kapat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    `);
+    const sheetList = el('div', 'cx-sheet-list');
+
+    items.forEach((item, idx) => {
+      const row = el('button', 'cx-sheet-item');
+      row.type = 'button';
+      row.dataset.target = item.id;
+      row.innerHTML = `
+        <span class="cx-sheet-num">${item.t.num || String(idx + 1).padStart(2, '0')}</span>
+        <span class="cx-sheet-name">${bi(item.t.tr || '', item.t.en || item.t.tr || '')}</span>
+        <span class="cx-sheet-badge">${item.total ? item.total : '–'}</span>
+      `;
+      row.addEventListener('click', () => {
+        closeSheet();
+        activate(item.id);
+        const top = explorer.getBoundingClientRect().top + window.scrollY - 8;
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
+      sheetList.append(row);
+    });
+
+    sheet.append(sheetHead, sheetList);
+    sheetBackdrop.append(sheet);
+    document.body.append(sheetBackdrop);
+
+    const openSheet = () => {
+      sheetBackdrop.classList.add('is-open');
+      document.body.classList.add('cx-sheet-locked');
+    };
+    const closeSheet = () => {
+      sheetBackdrop.classList.remove('is-open');
+      document.body.classList.remove('cx-sheet-locked');
+    };
+    triggerBtn.addEventListener('click', openSheet);
+    sheetBackdrop.addEventListener('click', e => {
+      if (e.target === sheetBackdrop || e.target.closest('.cx-sheet-close')) closeSheet();
     });
 
     const bottomRow = el('div', 'cx-bottom-row');
@@ -595,6 +697,8 @@
     const activate = (id, { focus = false } = {}) => {
       const item = items.find(i => i.id === id) || items[0];
       if (active === item) return;
+      const curIdx = items.indexOf(item);
+
       items.forEach(i => {
         const on = i === item;
         i.tab.classList.toggle('is-active', on);
@@ -603,6 +707,21 @@
         i.panel.classList.toggle('is-active', on);
         i.panel.hidden = !on;
       });
+
+      // Mobil bar güncelle
+      triggerBtn.querySelector('.cx-mob-idx').textContent = `${item.t.num || String(curIdx + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
+      triggerBtn.querySelector('.cx-mob-title').innerHTML = bi(item.t.tr || '', item.t.en || item.t.tr || '');
+      const badge = triggerBtn.querySelector('.cx-mob-badge');
+      badge.textContent = item.total ? `${item.total} ürün` : '–';
+
+      prevBtn.disabled = (curIdx === 0);
+      nextBtn.disabled = (curIdx === items.length - 1);
+
+      // Sheet aktif satır
+      sheetList.querySelectorAll('.cx-sheet-item').forEach(r => {
+        r.classList.toggle('is-active', r.dataset.target === item.id);
+      });
+
       stage.classList.toggle('is-empty-cat', item.total === 0);
       if (focus) item.tab.focus();
       if (rail.scrollWidth > rail.clientWidth) {
@@ -610,6 +729,24 @@
       }
       active = item;
     };
+
+    prevBtn.addEventListener('click', () => {
+      const idx = items.indexOf(active);
+      if (idx > 0) {
+        activate(items[idx - 1].id);
+        const top = explorer.getBoundingClientRect().top + window.scrollY - 8;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const idx = items.indexOf(active);
+      if (idx < items.length - 1) {
+        activate(items[idx + 1].id);
+        const top = explorer.getBoundingClientRect().top + window.scrollY - 8;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
 
     // Hover niyeti: yalnızca fare sağdaki panele çapraz giderken kısa gecikme uygula; dikey gezintide anında aç.
     let hoverTimer = null;
@@ -637,10 +774,6 @@
       item.tab.addEventListener('click', () => {
         clearTimeout(hoverTimer);
         activate(item.id);
-        if (window.matchMedia('(max-width: 899px)').matches) {
-          const top = stage.getBoundingClientRect().top - rail.getBoundingClientRect().bottom - 12;
-          if (top < 0) window.scrollBy({ top, behavior: 'smooth' });
-        }
       });
       item.tab.addEventListener('focus', () => activate(item.id));
     });
